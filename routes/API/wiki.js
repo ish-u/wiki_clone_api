@@ -2,44 +2,50 @@ const express = require('express')
 const fs = require('fs');
 const router = express.Router();
 const path = require('path');
+const WikiPage = require('../../models/pages');
 
 // get the list of all the pages
-router.get('/', (req,res) => {
-    fs.readdir('./wiki_pages', (err,files) => {
-        const pages = [];
-        files.forEach(file => {
-            pages.push({
-                "name": path.basename(file),
-                "content": fs.readFileSync(path.join('./wiki_pages',file)).toString()
-            })
-        })
-        console.log(pages);
-
-        res.json({"pages":pages})
-    })
+router.get('/', async (req,res) => {
+    try
+    {
+        const pages = await WikiPage.find();
+        res.send(pages)
+    }
+    catch(err)
+    {
+        res.json({ "msg" : err});
+    }
 })
 
 // post request to save a page
-router.post('/', (req,res) => {
-    const page = req.body.page;
-    const content = req.body.content;    
-    fs.writeFile(path.join('./wiki_pages',page+'.md'), '# HELLO', (err) => {
-        if(err) throw err;
-        res.json({"msg":"OK"});
+router.post('/', async (req,res) => {
+    const title = req.body.title;
+    const content = req.body.content;
+    const page = new WikiPage({
+        title : title,
+        content : content
     })
+    try
+    {
+        await page.save();
+        res.json({ "msg" : "Page Saved"});
+    }
+    catch(err)
+    {
+        res.json({ "msg" : err});
+    }
 })
 
 // delete request to remove a page
-router.delete('/:title', (req,res) => {
-    const title = req.params.title +'.md'
-    if(fs.existsSync(path.join('./wiki_pages',title)))
+router.delete('/:id', async (req,res) => {
+    try
     {
-        fs.unlinkSync(path.join('./wiki_pages',title));
-        res.json({"msg":`The Title ${title} has been removed`})
+        await WikiPage.deleteOne({ _id : req.params.id })
+        res.json({ "msg" : "Page Deleted"});
     }
-    else
+    catch(err)
     {
-        res.json({"msg":`No Such ${title} Exists`})
+        res.json({ "msg" : err});
     }
 })
 

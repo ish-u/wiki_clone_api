@@ -1,7 +1,9 @@
 const express = require('express');
 const exphbs = require('express-handlebars')
 const fs = require('fs');
-const wiki = require('./routes/API/wiki')
+const wiki = require('./routes/API/wiki');
+require('dotenv/config');
+const mongoose = require('mongoose');
 
 // Initaitlizing Express
 const app = express();
@@ -23,7 +25,23 @@ app.get('/', (req,res) => {
 })
 
 // route for the API
-app.use('/wiki', wiki)
+app.use('/wiki', wiki);
+
+// Connect to DB
+const uri = process.env.DB_CONNECTION;
+const connectionParams={
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useUnifiedTopology: true 
+}
+mongoose.connect(uri, connectionParams)
+    .then(() => {
+        console.log('Connected to database ')
+    })
+    .catch((err) => {
+        console.error(`Error connecting to the database. \n${err}`);
+    })
+
 
 // Listening for Requests
 app.listen(PORT,() => {
