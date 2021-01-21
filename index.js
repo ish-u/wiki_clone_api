@@ -1,5 +1,6 @@
 const express = require('express');
-const exphbs = require('express-handlebars')
+const exphbs = require('express-handlebars');
+const cors = require('cors');
 const fs = require('fs');
 const wiki = require('./routes/API/wiki');
 require('dotenv/config');
@@ -7,6 +8,9 @@ const mongoose = require('mongoose');
 
 // Initaitlizing Express
 const app = express();
+
+//cors middleware
+app.use(cors());
 
 // Body Parser Middleware
 app.use(express.json());

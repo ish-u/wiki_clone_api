@@ -17,9 +17,36 @@ router.get('/', async (req,res) => {
     }
 })
 
+// get the list of a specific page
+router.get('/:id', async (req,res) => {
+    try
+    {
+        const page = await WikiPage.find({ _id : req.params.id});
+        res.send(page)
+    }
+    catch(err)
+    {
+        res.json({ "msg" : err});
+    }
+})
+
+// get the list of searched pages
+router.get('/search/:q', async (req,res) => {
+    try
+    {
+        const q = req.params.q
+        const pages = await WikiPage.find({ title : new RegExp(q)});
+        res.send(pages)
+    }
+    catch(err)
+    {
+        res.json({ "msg" : err});
+    }
+})
+
 // post request to save a page
 router.post('/', async (req,res) => {
-    const title = req.body.title;
+    const title = req.body.title.toLowerCase();
     const content = req.body.content;
     const page = new WikiPage({
         title : title,
